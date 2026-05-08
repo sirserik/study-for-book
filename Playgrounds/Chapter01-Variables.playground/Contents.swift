@@ -3,7 +3,7 @@ import Foundation
 // MARK: - 1.1 Значение и переменная
 
 let temperature = 12
-let city = "Москва"
+let city = "Алматы"
 let isRaining = true
 
 // MARK: - 1.2 let и var
@@ -22,10 +22,10 @@ print("counter после двух +1:", counter)
 print(temperature)
 print(city, temperature)
 
-let pricePerKg = 200
+let pricePerKg = 950
 let weight = 3
 let total = pricePerKg * weight
-print("Итог:", total)
+print("Итог:", total, "тенге")
 
 // MARK: - 1.5 Типы
 
@@ -52,7 +52,7 @@ print("Int.max:", Int.max)
 
 // Большие числа с разделителями
 let million = 1_000_000
-let salary = 250_000
+let salary = 450_000
 let speedOfLight = 299_792_458
 print("million == 1000000:", million == 1000000)
 
@@ -110,24 +110,24 @@ print("Int(\"abc\") =", bad as Any)           // nil
 
 // MARK: - 1.12 Строки и escape
 
-let quoted = "Она сказала: \"Привет\"."
+let quoted = "Она сказала: \"Сәлем!\""
 print(quoted)
 
 let multiline = """
-    Я помню чудное мгновенье:
-    Передо мной явилась ты.
+    Менің Отаным — Қазақстан,
+    Жерім, көгім, дарқан болсын.
     """
 print(multiline)
 
 // raw-строка
-let path = #"C:\Users\Alex\Downloads"#
+let path = #"C:\Users\Aidos\Downloads"#
 print(path)
 
 // MARK: - 1.13 Интерполяция
 
-let name = "Аня"
+let name = "Айгерим"
 let age = 25
-print("Привет, \(name)! Тебе \(age) лет.")
+print("Сәлем, \(name)! Тебе \(age) лет.")
 
 let aa = 5
 let bb = 3
@@ -137,7 +137,7 @@ print("Сумма: \(aa + bb), среднее: \((aa + bb) / 2)")
 
 let priceValue = 1234.567
 print(priceValue.formatted(.number.precision(.fractionLength(2))))
-print(priceValue.formatted(.currency(code: "RUB")))
+print(priceValue.formatted(.currency(code: "KZT")))
 print(priceValue.formatted(.currency(code: "USD")))
 
 let bigNumber = 1_500_000
@@ -153,17 +153,17 @@ print("logged && admin:", isLoggedIn && isAdmin)
 print("logged || admin:", isLoggedIn || isAdmin)
 print("!logged || admin:", !isLoggedIn || isAdmin)
 
-// MARK: - Большое упражнение 1.9: расчёт чека Антона
+// MARK: - Большое упражнение 1.9: расчёт чека Бауыржана
 
-let pricePerApple = 45
+let pricePerApple = 250
 let appleCount = 7
-let pricePerBanana = 80
+let pricePerBanana = 450
 let bananaCount = 3
-let taxRate = 0.05
+let vatRate = 0.12
 
 let subtotal = pricePerApple * appleCount + pricePerBanana * bananaCount
-let totalDouble = Double(subtotal) * (1 + taxRate)
+let totalDouble = Double(subtotal) * (1 + vatRate)
 let totalRounded = Int(totalDouble.rounded())
 let itemCount = appleCount + bananaCount
 
-print("Антон купил \(itemCount) единиц товара. Итого: \(totalRounded) ₽ (включая 5% налога).")
+print("Бауыржан купил \(itemCount) единиц товара. Итого: \(totalRounded) ₸ (включая 12% НДС).")
