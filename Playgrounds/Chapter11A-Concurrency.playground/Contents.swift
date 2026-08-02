@@ -1,15 +1,14 @@
 import Foundation
 
-// Примечание: командная строка `swift Contents.swift` имеет особенности.
-// Главный поток (на котором мы здесь печатаем) — это MainActor. Если мы
-// делаем Task { } и ждём через g.wait(), main блокируется — Task'и
-// без @MainActor работают в фоне, но Task с @MainActor / MainActor.run
-// внутри уже не могут попасть на занятый main thread → deadlock.
+// Примечание про запуск. Верхний уровень скрипта в режиме Swift 6 — это
+// MainActor, и `await` здесь работает напрямую: `let x = await foo()`.
+// Именно так тут всё и написано.
 //
-// Поэтому в этом Playground:
-// 1) MainActor-демонстрации делаем синхронно через MainActor.assumeIsolated.
-// 2) Task'и без MainActor запускаем без waiting.
-// 3) В конце Thread.sleep даём Task'ам время дозаписать вывод.
+// Чего делать НЕЛЬЗЯ: запускать Task { } и ждать его через
+// DispatchGroup.wait() или семафор. Ожидание блокирует главный поток,
+// а Task, унаследовавший MainActor, ждёт освобождения этого же потока —
+// программа зависает навсегда. Это классический дедлок, и раньше в этом
+// файле он был.
 
 // MARK: - 11A.4 async/await
 
@@ -24,43 +23,31 @@ func processChain() async -> String {
 }
 
 print("--- 11A.4 async/await ---")
-let g4 = DispatchGroup()
-g4.enter()
-Task {
-    let result = await processChain()
-    print("result:", result)
-    g4.leave()
-}
-g4.wait()
+let result = await processChain()
+print("result:", result)
 
 // MARK: - 11A.5/6 Task и порядок выполнения
 
 print("--- 11A.5/6 Task ---")
-let g5 = DispatchGroup()
-g5.enter()
-Task {
+// Task { } запускается «в сторону»: код после него выполняется сразу,
+// не дожидаясь тела задачи. Чтобы дождаться результата — сохраняем
+// задачу и берём её .value.
+let t56 = Task {
     print("в Task: 1")
     let data = await loadFromServer()
     print("в Task: 2 ->", data)
-    g5.leave()
 }
-print("после Task() (main thread продолжил)")
-g5.wait()
+print("после Task() (главный поток продолжил)")
+await t56.value
 
 // MARK: - 11A.7 Task value
 
 print("--- 11A.7 task.value ---")
-let g7 = DispatchGroup()
-g7.enter()
-Task {
-    let task = Task { return await loadFromServer() }
-    let v = await task.value
-    print("task.value:", v)
-    g7.leave()
-}
-g7.wait()
+let valueTask = Task { return await loadFromServer() }
+let v = await valueTask.value
+print("task.value:", v)
 
-// MARK: - 11A.8 @MainActor (синхронно через assumeIsolated)
+// MARK: - 11A.8 @MainActor
 
 @MainActor
 final class HomeVM {
@@ -75,29 +62,31 @@ final class HomeVM {
 }
 
 print("--- 11A.8 @MainActor ---")
-MainActor.assumeIsolated {
-    let vm = HomeVM()
-    vm.reload()
-    print("products:", vm.products)
-    print("isLoading:", vm.isLoading)
-}
+// Верхний уровень скрипта уже на главном акторе, поэтому обращаемся
+// к @MainActor-классу напрямую, без await и без обходных приёмов.
+let vm = HomeVM()
+vm.reload()
+print("products:", vm.products)
+print("isLoading:", vm.isLoading)
 
 // MARK: - 11A.9 MainActor.run
-// В обычном iOS-приложении MainActor.run внутри Task переключает на main:
-//
-//   Task {
-//       let data = await loadFromServer()        // background
-//       await MainActor.run {
-//           self.tableView.reloadData()           // main — для UI
-//       }
-//   }
-//
-// В скрипте `swift Contents.swift` это вызывает деадлок: g.wait()
-// блокирует main, MainActor.run хочет main → ждут друг друга.
-// Поэтому здесь демонстрируем только синтаксис.
 
-print("--- 11A.9 MainActor.run (синтаксис) ---")
-print("await MainActor.run { ... } — переход на main изнутри Task")
+// MainActor.run нужен, когда мы ТОЧНО не на главном акторе — например,
+// внутри Task.detached. Проверяем это на практике.
+func heavyCalculation() -> Int {
+    (1...1_000_000).reduce(0, +)
+}
+
+print("--- 11A.9 MainActor.run ---")
+let detached = Task.detached {
+    // считаем в фоне, главный поток свободен
+    let sum = heavyCalculation()
+    await MainActor.run {
+        // а здесь мы уже на главном акторе — тут можно трогать UI
+        print("на главном акторе, сумма:", sum)
+    }
+}
+await detached.value
 
 // MARK: - 11A.10 nonisolated
 
@@ -110,25 +99,17 @@ final class FormatterClass {
 }
 
 print("--- 11A.10 nonisolated ---")
-MainActor.assumeIsolated {
-    let f = FormatterClass()
-    print(f.formatPrice(1500))
-}
+let f = FormatterClass()
+print(f.formatPrice(1500))
 
 // MARK: - 11A.11 Task.sleep
 
 print("--- 11A.11 Task.sleep ---")
-let g11 = DispatchGroup()
-g11.enter()
-Task {
-    print("До sleep")
-    let start = Date()
-    try await Task.sleep(for: .milliseconds(300))
-    let elapsed = Date().timeIntervalSince(start)
-    print("Прошло:", String(format: "%.2f", elapsed), "сек")
-    g11.leave()
-}
-g11.wait()
+print("До sleep")
+let sleepStart = Date()
+try await Task.sleep(for: .milliseconds(300))
+let sleepElapsed = Date().timeIntervalSince(sleepStart)
+print("Прошло:", String(format: "%.2f", sleepElapsed), "сек")
 
 // MARK: - 11A.12 Cancellation
 
@@ -141,25 +122,19 @@ func longWork() async throws -> Int {
 }
 
 print("--- 11A.12 Cancellation ---")
-let g12 = DispatchGroup()
-g12.enter()
-Task {
-    let task = Task<Int, Error> {
-        return try await longWork()
-    }
-    try? await Task.sleep(for: .milliseconds(100))
-    task.cancel()
-    do {
-        let r = try await task.value
-        print("результат:", r)
-    } catch is CancellationError {
-        print("Отменена через 100мс")
-    } catch {
-        print("Ошибка:", error)
-    }
-    g12.leave()
+let cancellableTask = Task<Int, Error> {
+    return try await longWork()
 }
-g12.wait()
+try? await Task.sleep(for: .milliseconds(100))
+cancellableTask.cancel()
+do {
+    let r = try await cancellableTask.value
+    print("результат:", r)
+} catch is CancellationError {
+    print("Отменена через 100мс")
+} catch {
+    print("Ошибка:", error)
+}
 
 // MARK: - 11A.13 async let
 
@@ -168,23 +143,17 @@ func loadProducts() async -> [String] { ["Латте", "Раф"] }
 func loadOrders() async -> [String] { ["ORD-001", "ORD-002"] }
 
 print("--- 11A.13 async let ---")
-let g13 = DispatchGroup()
-g13.enter()
-Task {
-    let start = Date()
-    async let user = loadUser()
-    async let products = loadProducts()
-    async let orders = loadOrders()
+let parallelStart = Date()
+async let user = loadUser()
+async let products = loadProducts()
+async let orders = loadOrders()
 
-    let (u, p, o) = await (user, products, orders)
-    let elapsed = Date().timeIntervalSince(start)
-    print("user:", u)
-    print("products:", p)
-    print("orders:", o)
-    print("параллельно за", String(format: "%.3f", elapsed), "сек")
-    g13.leave()
-}
-g13.wait()
+let (u, p, o) = await (user, products, orders)
+let parallelElapsed = Date().timeIntervalSince(parallelStart)
+print("user:", u)
+print("products:", p)
+print("orders:", o)
+print("параллельно за", String(format: "%.3f", parallelElapsed), "сек")
 
 // MARK: - 11A.14 TaskGroup
 
@@ -194,23 +163,17 @@ func fetchValue(_ id: Int) async -> Int {
 }
 
 print("--- 11A.14 TaskGroup ---")
-let g14 = DispatchGroup()
-g14.enter()
-Task {
-    let results = await withTaskGroup(of: Int.self) { group in
-        for id in 1...5 {
-            group.addTask { return await fetchValue(id) }
-        }
-        var collected: [Int] = []
-        for await result in group {
-            collected.append(result)
-        }
-        return collected.sorted()
+let results = await withTaskGroup(of: Int.self) { group in
+    for id in 1...5 {
+        group.addTask { return await fetchValue(id) }
     }
-    print("TaskGroup results:", results)
-    g14.leave()
+    var collected: [Int] = []
+    for await result in group {
+        collected.append(result)
+    }
+    return collected.sorted()
 }
-g14.wait()
+print("TaskGroup results:", results)
 
 // MARK: - 11A.16 Sendable
 
@@ -233,14 +196,8 @@ print("--- 11A.16 Sendable ---")
 let prod = ProductSendable(id: 1, title: "Латте", price: 1200)
 let cfg = APIConfig(baseURL: "https://shop.example.kz", timeout: 30)
 
-let g16 = DispatchGroup()
-g16.enter()
-Task.detached {
-    print("в Task.detached:", prod.title, prod.price, "₸")
-    print("config:", cfg.baseURL)
-    g16.leave()
-}
-g16.wait()
+print("в Task.detached:", prod.title, prod.price, "₸")
+print("config:", cfg.baseURL)
 
 // MARK: - 11A.17 actor
 
@@ -256,18 +213,12 @@ actor BankAccount {
 }
 
 print("--- 11A.17 actor ---")
-let g17 = DispatchGroup()
-g17.enter()
-Task {
-    let account = BankAccount()
-    await account.deposit(1500)
-    await account.deposit(500)
-    let ok = await account.withdraw(800)
-    print("withdraw 800:", ok)
-    print("balance:", await account.getBalance(), "₸")
-    g17.leave()
-}
-g17.wait()
+let account = BankAccount()
+await account.deposit(1500)
+await account.deposit(500)
+let ok = await account.withdraw(800)
+print("withdraw 800:", ok)
+print("balance:", await account.getBalance(), "₸")
 
 // MARK: - 11A.20 withCheckedContinuation
 
@@ -292,18 +243,12 @@ func loadAsync() async throws -> [String] {
 }
 
 print("--- 11A.20 withCheckedContinuation ---")
-let g20 = DispatchGroup()
-g20.enter()
-Task {
-    do {
-        let items = try await loadAsync()
-        print("loaded async:", items)
-    } catch {
-        print("error:", error)
-    }
-    g20.leave()
+do {
+    let items = try await loadAsync()
+    print("loaded async:", items)
+} catch {
+    print("error:", error)
 }
-g20.wait()
 
 // MARK: - Большое упражнение 11A.1: DataLoader actor
 
@@ -333,9 +278,7 @@ actor DataLoader {
 }
 
 print("--- 11A.1 DataLoader actor ---")
-let gA1 = DispatchGroup()
-gA1.enter()
-Task {
+do {
     let loader = DataLoader()
     let start = Date()
     let d1 = try await loader.load("hello")
@@ -361,8 +304,6 @@ Task {
     } catch {
         print("error:", error)
     }
-    gA1.leave()
 }
-gA1.wait()
 
 print("--- Done ---")

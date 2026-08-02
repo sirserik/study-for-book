@@ -246,16 +246,13 @@ actor BankAccount {
 }
 
 let account = BankAccount()
-let group = DispatchGroup()
-group.enter()
-Task {
-    await account.deposit(500)
-    await account.deposit(300)
-    let b = await account.getBalance()
-    print("balance:", b, "₸")            // 800 ₸
-    group.leave()
-}
-group.wait()
+// await прямо на верхнем уровне скрипта: в Swift 6 так можно, и это
+// единственный правильный способ дождаться актора. Блокировать main
+// через DispatchGroup.wait() нельзя — получится дедлок.
+await account.deposit(500)
+await account.deposit(300)
+let currentBalance = await account.getBalance()
+print("balance:", currentBalance, "₸")            // 800 ₸
 
 // MARK: - 8.13 final class
 
@@ -301,6 +298,6 @@ Task {
     print("config:", config.baseURL)
 }
 
-Thread.sleep(forTimeInterval: 0.1)
+try? await Task.sleep(for: .milliseconds(100))
 
 print("--- Done ---")

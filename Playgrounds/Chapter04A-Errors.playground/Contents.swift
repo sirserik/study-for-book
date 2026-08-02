@@ -212,18 +212,15 @@ func fetchData() async throws -> String {
 }
 
 print("--- 4A.14 try await ---")
-let asyncGroup = DispatchGroup()
-asyncGroup.enter()
-Task {
-    do {
-        let d = try await fetchData()
-        print("got:", d)
-    } catch {
-        print("error:", error)
-    }
-    asyncGroup.leave()
+// В Swift 6 верхний уровень скрипта — это MainActor, и `await` здесь
+// доступен напрямую. Ждать через DispatchGroup.wait() нельзя: main
+// окажется заблокирован, Task на него не попадёт — дедлок.
+do {
+    let d = try await fetchData()
+    print("got:", d)
+} catch {
+    print("error:", error)
 }
-asyncGroup.wait()
 
 // MARK: - Большое упражнение 4A.1/4A.2/4A.3
 

@@ -236,14 +236,11 @@ func loadProductsAsync() async -> [String] {
 }
 
 print("--- 11.20 async/await ---")
-let asyncGroup = DispatchGroup()
-asyncGroup.enter()
-Task {
-    let products = await loadProductsAsync()
-    print("async result:", products)
-    asyncGroup.leave()
-}
-asyncGroup.wait()
+// В Swift 6 верхний уровень скрипта уже асинхронный: пишем await напрямую.
+// Ждать Task через DispatchGroup.wait() нельзя — главный поток
+// заблокируется, а Task на него не попадёт (дедлок).
+let products = await loadProductsAsync()
+print("async result:", products)
 
 // MARK: - Большое упражнение 11.4
 

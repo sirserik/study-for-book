@@ -38,44 +38,54 @@ struct MockLogger {
     let category: String
 
     // В Release минимальный уровень — notice. В Debug — debug.
-    static var minLevel: LogLevel = {
-        #if DEBUG
-        return .debug
-        #else
-        return .notice
-        #endif
-    }()
+    //
+    // Настройки общие для всего приложения, а менять их можно из любого
+    // места, поэтому в Swift 6 обычный `static var` не пройдёт: компилятор
+    // не даст изменяемое глобальное состояние без защиты. Кладём их
+    // в @MainActor-хранилище — доступ только с главного потока.
+    @MainActor
+    enum Settings {
+        static var minLevel: LogLevel = {
+            #if DEBUG
+            return .debug
+            #else
+            return .notice
+            #endif
+        }()
 
-    static var redactPrivate: Bool = {
-        #if DEBUG
-        return false
-        #else
-        return true
-        #endif
-    }()
+        static var redactPrivate: Bool = {
+            #if DEBUG
+            return false
+            #else
+            return true
+            #endif
+        }()
+    }
 
+    @MainActor
     func write(_ level: LogLevel, _ message: String) {
-        guard level >= MockLogger.minLevel else { return }
+        guard level >= MockLogger.Settings.minLevel else { return }
         let timestamp = ISO8601DateFormatter().string(from: Date())
         print("[\(timestamp)] [\(level.label)] [\(subsystem)/\(category)] \(message)")
     }
 
-    func debug(_ message: String) { write(.debug, message) }
-    func info(_ message: String) { write(.info, message) }
-    func notice(_ message: String) { write(.notice, message) }
-    func warning(_ message: String) { write(.warning, message) }
-    func error(_ message: String) { write(.error, message) }
-    func critical(_ message: String) { write(.critical, message) }
-    func fault(_ message: String) { write(.fault, message) }
+    @MainActor func debug(_ message: String) { write(.debug, message) }
+    @MainActor func info(_ message: String) { write(.info, message) }
+    @MainActor func notice(_ message: String) { write(.notice, message) }
+    @MainActor func warning(_ message: String) { write(.warning, message) }
+    @MainActor func error(_ message: String) { write(.error, message) }
+    @MainActor func critical(_ message: String) { write(.critical, message) }
+    @MainActor func fault(_ message: String) { write(.fault, message) }
 }
 
 // Утилита для имитации privacy markers (\(value, privacy: .private))
+@MainActor
 func privacy(_ value: Any, _ marker: Privacy) -> String {
     switch marker {
     case .public:
         return "\(value)"
     case .private:
-        return MockLogger.redactPrivate ? "<private>" : "\(value)"
+        return MockLogger.Settings.redactPrivate ? "<private>" : "\(value)"
     case .sensitive:
         return "<sensitive>"
     }
@@ -96,7 +106,7 @@ extension MockLogger {
 // MARK: - 16A.2/3 Уровни и категории
 
 print("--- 16A.3 Уровни логирования ---")
-MockLogger.minLevel = .debug   // показываем все
+MockLogger.Settings.minLevel = .debug   // показываем все
 
 MockLogger.network.debug("Готовим запрос к /api/products")
 MockLogger.network.info("Запрос отправлен")
@@ -106,12 +116,12 @@ MockLogger.network.error("Не удалось распарсить product[id=42
 MockLogger.network.fault("Сетевой сервис вернул невалидный JSON")
 
 print("\n--- 16A.3 В Release минимальный уровень notice ---")
-MockLogger.minLevel = .notice
+MockLogger.Settings.minLevel = .notice
 MockLogger.network.debug("Этот debug не попадёт в лог в Release")
 MockLogger.network.info("Этот info тоже не попадёт")
 MockLogger.network.notice("А notice попадёт")
 MockLogger.network.error("И error тоже")
-MockLogger.minLevel = .debug   // вернули обратно
+MockLogger.Settings.minLevel = .debug   // вернули обратно
 
 // MARK: - 16A.4 Privacy markers
 
@@ -122,16 +132,16 @@ let userName = "Айгерим"
 let userEmail = "ai@example.kz"
 
 print("Сценарий DEBUG (показываем приватные значения):")
-MockLogger.redactPrivate = false
+MockLogger.Settings.redactPrivate = false
 MockLogger.auth.info("ID=\(privacy(userId, .public)) name=\(privacy(userName, .private)) email=\(privacy(userEmail, .private))")
 
 print("\nСценарий RELEASE (privacy скрывает):")
-MockLogger.redactPrivate = true
+MockLogger.Settings.redactPrivate = true
 MockLogger.auth.info("ID=\(privacy(userId, .public)) name=\(privacy(userName, .private)) email=\(privacy(userEmail, .private))")
 
 print("\nSensitive — скрыто всегда:")
 let cardNumber = "4242 4242 4242 4242"
-MockLogger.redactPrivate = false
+MockLogger.Settings.redactPrivate = false
 MockLogger.payment.info("CC=\(privacy(cardNumber, .sensitive))")
 
 // MARK: - 16A.6 Format specifiers

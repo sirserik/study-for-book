@@ -132,7 +132,7 @@ print("--- 9.7 static ---")
 print("baseURL:", AppConfig.baseURL)
 print("makeURL:", AppConfig.makeURL(for: "/products") ?? "nil")
 
-final class AppLogger {
+final class AppLogger: Sendable {
     static let shared = AppLogger()
     private init() {}
 
