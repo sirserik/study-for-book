@@ -56,7 +56,7 @@ extension ProductsViewController: UITableViewDataSource {
             withIdentifier: ProductCell.reuseID, for: indexPath
         ) as! ProductCell
         let p = viewModel.product(at: indexPath.row)
-        cell.configure(title: p.title, subtitle: p.description, price: p.price)
+        cell.configure(p)
         return cell
     }
 }

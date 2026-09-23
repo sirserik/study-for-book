@@ -17,10 +17,20 @@ final class ProductCell: UITableViewCell {
         fatalError("init(coder:) not used")
     }
 
-    func configure(title: String, subtitle: String, price: Double) {
-        titleLabel.text = title
-        subtitleLabel.text = subtitle
-        priceLabel.text = Money.text(price)
+    func configure(_ product: Product) {
+        titleLabel.text = product.title
+        subtitleLabel.text = product.description
+        priceLabel.text = Money.text(product.price)
+        productImageView.setImage(from: product.thumbnail,
+                                  placeholder: UIImage(systemName: "photo"))
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        productImageView.image = nil
+        titleLabel.text = nil
+        subtitleLabel.text = nil
+        priceLabel.text = nil
     }
 
     private func setupViews() {
