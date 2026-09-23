@@ -2,34 +2,46 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    private var tapCount = 0
+    private let counterLabel = UILabel()
+    private let button = UIButton(type: .system)
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
 
-        let button = UIButton(type: .system)
-        button.setTitle("Тапни меня", for: .normal)
+        // Лейбл со счётчиком
+        counterLabel.text = "Нажатий: 0"
+        counterLabel.font = .boldSystemFont(ofSize: 28)
+        counterLabel.textAlignment = .center
+
+        // Кнопка
+        button.setTitle("Нажми", for: .normal)
         button.backgroundColor = .systemBlue
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 12
-
         button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
 
-        view.addSubview(button)
-        button.translatesAutoresizingMaskIntoConstraints = false
+        // Стек
+        let stack = UIStackView(arrangedSubviews: [counterLabel, button])
+        stack.axis = .vertical
+        stack.spacing = 24
+        stack.alignment = .center
+
+        view.addSubview(stack)
+        stack.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            button.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            stack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+
             button.widthAnchor.constraint(equalToConstant: 200),
             button.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
 
     @objc private func didTapButton() {
-        let alert = UIAlertController(title: "Привет!",
-                                       message: "Кнопка работает 🎉",
-                                       preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ок", style: .default))
-        present(alert, animated: true)
+        tapCount += 1
+        counterLabel.text = "Нажатий: \(tapCount)"
     }
 }
