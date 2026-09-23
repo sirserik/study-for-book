@@ -1,0 +1,33 @@
+name: iOS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Build and Test
+    runs-on: macos-26
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.5.app
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project study-for-book.xcodeproj \
+            -scheme study-for-book \
+            -destination 'platform=iOS Simulator,name=iPhone 17'
+
+      - name: Test
+        run: |
+          xcodebuild test \
+            -project study-for-book.xcodeproj \
+            -scheme study-for-book \
+            -destination 'platform=iOS Simulator,name=iPhone 17'
