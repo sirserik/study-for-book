@@ -39,6 +39,16 @@ final class ProductsViewModel {
         }
     }
 
+    /// Товары, если они загружены. В остальных состояниях — пусто.
+    var products: [Product] {
+        if case .loaded(let items) = state { return items }
+        return []
+    }
+
+    func numberOfRows() -> Int { products.count }
+
+    func product(at index: Int) -> Product { products[index] }
+
     // Из главы 19 — сетевой код живёт отдельно от интерфейса.
     // В главе 27 переедет в APIClient.
     private func fetchProducts(limit: Int) async throws -> [Product] {
