@@ -2,45 +2,45 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    private var tapCount = 0
     private let counterLabel = UILabel()
-    private let button = UIButton(type: .system)
+    private let tapButton = UIButton(type: .system)
+    private var tapCount = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
 
-        // Лейбл со счётчиком
+        // настройка counterLabel
         counterLabel.text = "Нажатий: 0"
-        counterLabel.font = .boldSystemFont(ofSize: 28)
+        counterLabel.font = .preferredFont(forTextStyle: .title2)
         counterLabel.textAlignment = .center
 
-        // Кнопка
-        button.setTitle("Нажми", for: .normal)
-        button.backgroundColor = .systemBlue
-        button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 12
-        button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
+        // настройка tapButton
+        var config = UIButton.Configuration.filled()
+        config.title = "Тап!"
+        config.cornerStyle = .medium
+        tapButton.configuration = config
+        tapButton.addTarget(self, action: #selector(didTap), for: .touchUpInside)
 
-        // Стек
-        let stack = UIStackView(arrangedSubviews: [counterLabel, button])
-        stack.axis = .vertical
-        stack.spacing = 24
-        stack.alignment = .center
+        // добавляем в иерархию
+        [counterLabel, tapButton].forEach {
+            view.addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
 
-        view.addSubview(stack)
-        stack.translatesAutoresizingMaskIntoConstraints = false
-
+        // constraints
         NSLayoutConstraint.activate([
-            stack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stack.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            counterLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            counterLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -32),
 
-            button.widthAnchor.constraint(equalToConstant: 200),
-            button.heightAnchor.constraint(equalToConstant: 50)
+            tapButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            tapButton.topAnchor.constraint(equalTo: counterLabel.bottomAnchor, constant: 24),
+            tapButton.widthAnchor.constraint(equalToConstant: 200),
+            tapButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
 
-    @objc private func didTapButton() {
+    @objc private func didTap() {
         tapCount += 1
         counterLabel.text = "Нажатий: \(tapCount)"
     }
