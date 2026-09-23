@@ -109,7 +109,38 @@ final class CartViewController: UIViewController {
     }
 
     @objc private func checkoutTapped() {
-        print("Оформление заказа — глава 29")
+        guard !CartStorage.shared.items.isEmpty,
+              let nav = navigationController else { return }
+
+        guard AuthService.shared.isLoggedIn else {
+            showLogin(from: nav)
+            return
+        }
+
+        startCheckout(in: nav)
+    }
+
+    private func startCheckout(in nav: UINavigationController) {
+        let coordinator = CheckoutCoordinator(
+            navigationController: nav,
+            cartItems: CartStorage.shared.items
+        )
+        coordinator.onComplete = { [weak self] in
+            nav.popToRootViewController(animated: true)
+            self?.tabBarController?.selectedIndex = 0
+        }
+        coordinator.start()
+    }
+
+    private func showLogin(from nav: UINavigationController) {
+        let login = LoginViewController()
+        login.onSuccess = { [weak self, weak nav] in
+            guard let self, let nav else { return }
+            nav.dismiss(animated: true) {
+                self.startCheckout(in: nav)
+            }
+        }
+        present(UINavigationController(rootViewController: login), animated: true)
     }
 }
 
