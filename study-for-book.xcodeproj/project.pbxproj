@@ -6,8 +6,30 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1347C1E9B50F26CD4DE051CA /* ProductDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC98DCDC0965BB5906A5F367 /* ProductDecodingTests.swift */; };
+		4B9F2A5497CD960A9944E9B7 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB8E44884BEDA3D48EEC9EDE /* Foundation.framework */; };
+		5B9F6E0F7A065968DB38AFC6 /* RegistrationFormTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D17D6B46FBEC99CB9646C9 /* RegistrationFormTests.swift */; };
+		993372DCB7341EE94B2A6E54 /* CartStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01C973B7D7AB68C8D8ADCE2 /* CartStorageTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		7F219584AA890737D94C723B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 721691D92FAD952C00E73E7B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 721691E02FAD952C00E73E7B;
+			remoteInfo = "study-for-book";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		3D322B900783B270A4EF1B20 /* study-for-bookTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "study-for-bookTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		721691E12FAD952C00E73E7B /* study-for-book.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "study-for-book.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		97D17D6B46FBEC99CB9646C9 /* RegistrationFormTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RegistrationFormTests.swift; sourceTree = "<group>"; };
+		BB8E44884BEDA3D48EEC9EDE /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		BC98DCDC0965BB5906A5F367 /* ProductDecodingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProductDecodingTests.swift; sourceTree = "<group>"; };
+		D01C973B7D7AB68C8D8ADCE2 /* CartStorageTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CartStorageTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -32,6 +54,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		376F43119CB21C5F1CBA9C62 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4B9F2A5497CD960A9944E9B7 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		721691DE2FAD952C00E73E7B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -42,11 +72,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		121A75386AC0CD7632D8A55A /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				BB8E44884BEDA3D48EEC9EDE /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		721691D82FAD952C00E73E7B = {
 			isa = PBXGroup;
 			children = (
 				721691E32FAD952C00E73E7B /* study-for-book */,
 				721691E22FAD952C00E73E7B /* Products */,
+				B301B20740AABDFF10DE77F4 /* Frameworks */,
+				CD038025D66B62C1193B1A41 /* study-for-bookTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -54,8 +94,28 @@
 			isa = PBXGroup;
 			children = (
 				721691E12FAD952C00E73E7B /* study-for-book.app */,
+				3D322B900783B270A4EF1B20 /* study-for-bookTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B301B20740AABDFF10DE77F4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				121A75386AC0CD7632D8A55A /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CD038025D66B62C1193B1A41 /* study-for-bookTests */ = {
+			isa = PBXGroup;
+			children = (
+				D01C973B7D7AB68C8D8ADCE2 /* CartStorageTests.swift */,
+				BC98DCDC0965BB5906A5F367 /* ProductDecodingTests.swift */,
+				97D17D6B46FBEC99CB9646C9 /* RegistrationFormTests.swift */,
+			);
+			name = "study-for-bookTests";
+			path = "study-for-bookTests";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -77,11 +137,27 @@
 				721691E32FAD952C00E73E7B /* study-for-book */,
 			);
 			name = "study-for-book";
-			packageProductDependencies = (
-			);
 			productName = "study-for-book";
 			productReference = 721691E12FAD952C00E73E7B /* study-for-book.app */;
 			productType = "com.apple.product-type.application";
+		};
+		ABF7307708A3881FA6CEFF18 /* study-for-bookTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BA005A20A793AA6ACA423A80 /* Build configuration list for PBXNativeTarget "study-for-bookTests" */;
+			buildPhases = (
+				423DA83A2D1BE1E152DCC160 /* Sources */,
+				376F43119CB21C5F1CBA9C62 /* Frameworks */,
+				3E45A1BDB65B9895F5430BB2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DC6017575731F07106AD1DE6 /* PBXTargetDependency */,
+			);
+			name = "study-for-bookTests";
+			productName = "study-for-bookTests";
+			productReference = 3D322B900783B270A4EF1B20 /* study-for-bookTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -113,11 +189,19 @@
 			projectRoot = "";
 			targets = (
 				721691E02FAD952C00E73E7B /* study-for-book */,
+				ABF7307708A3881FA6CEFF18 /* study-for-bookTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3E45A1BDB65B9895F5430BB2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		721691DF2FAD952C00E73E7B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +212,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		423DA83A2D1BE1E152DCC160 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				993372DCB7341EE94B2A6E54 /* CartStorageTests.swift in Sources */,
+				1347C1E9B50F26CD4DE051CA /* ProductDecodingTests.swift in Sources */,
+				5B9F6E0F7A065968DB38AFC6 /* RegistrationFormTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		721691DD2FAD952C00E73E7B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,7 +231,35 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		DC6017575731F07106AD1DE6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "study-for-book";
+			target = 721691E02FAD952C00E73E7B /* study-for-book */;
+			targetProxy = 7F219584AA890737D94C723B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		34A8992667B8348F1E43DABD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "kz.waid.study-for-bookTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/study-for-book.app/study-for-book";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		721691F52FAD952F00E73E7B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -325,6 +447,24 @@
 			};
 			name = Release;
 		};
+		D62F6A99D9E259946EACEF63 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "kz.waid.study-for-bookTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/study-for-book.app/study-for-book";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -342,6 +482,15 @@
 			buildConfigurations = (
 				721691F52FAD952F00E73E7B /* Debug */,
 				721691F62FAD952F00E73E7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BA005A20A793AA6ACA423A80 /* Build configuration list for PBXNativeTarget "study-for-bookTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				34A8992667B8348F1E43DABD /* Release */,
+				D62F6A99D9E259946EACEF63 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -13,12 +13,36 @@ enum CartChange {
     case removed(index: Int)            // товар убрали
 }
 
+/// Куда корзина пишет свои байты. В приложении — UserDefaults, в тестах — память.
+protocol KeyValueStore {
+    func data(forKey key: String) -> Data?
+    func set(_ value: Data, forKey key: String)
+}
+
+extension UserDefaults: KeyValueStore {
+    func set(_ value: Data, forKey key: String) {
+        self.set(value as Any, forKey: key)
+    }
+}
+
+final class InMemoryStore: KeyValueStore {
+    private var dict: [String: Data] = [:]
+    func data(forKey key: String) -> Data? { dict[key] }
+    func set(_ value: Data, forKey key: String) { dict[key] = value }
+}
+
 @MainActor
 final class CartStorage {
     static let shared = CartStorage()
-    private init() {}
 
-    private let key = "cart.items"
+    private let store: KeyValueStore
+    private let key: String
+
+    init(store: KeyValueStore = UserDefaults.standard, key: String = "cart.items") {
+        self.store = store
+        self.key = key
+    }
+
     private(set) var items: [CartItem] = []
 
     private var observers: [(CartChange) -> Void] = []
@@ -32,7 +56,7 @@ final class CartStorage {
     }
 
     func load() {
-        guard let data = UserDefaults.standard.data(forKey: key) else { return }
+        guard let data = store.data(forKey: key) else { return }
         guard let saved = try? JSONDecoder().decode([CartItem].self, from: data) else { return }
         items = saved
         save(.reloaded)
@@ -41,7 +65,7 @@ final class CartStorage {
     /// Пишет корзину на диск и сообщает подписчикам, что изменилось.
     private func save(_ change: CartChange) {
         if let data = try? JSONEncoder().encode(items) {
-            UserDefaults.standard.set(data, forKey: key)
+            store.set(data, forKey: key)
         }
         notify(change)
     }
