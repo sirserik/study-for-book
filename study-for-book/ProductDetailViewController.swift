@@ -132,7 +132,14 @@ final class ProductDetailViewController: UIViewController {
     }
 
     @objc private func addToCartTapped() {
-        print("Добавили \(product.title) в корзину")
-        // настоящая корзина — в главе 24
+        CartStorage.shared.add(product)
+
+        let alert = UIAlertController(
+            title: "Добавлено",
+            message: "\(product.title) в корзине",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }
