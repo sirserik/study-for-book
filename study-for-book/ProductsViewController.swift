@@ -7,6 +7,8 @@ final class ProductsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
         title = "Товары"
         setupTable()
 
@@ -43,6 +45,7 @@ final class ProductsViewController: UIViewController {
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 110
         tableView.dataSource = self
+        tableView.delegate = self
     }
 }
 
@@ -61,3 +64,11 @@ extension ProductsViewController: UITableViewDataSource {
     }
 }
 
+extension ProductsViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let product = viewModel.product(at: indexPath.row)
+        let detail = ProductDetailViewController(product: product)
+        navigationController?.pushViewController(detail, animated: true)
+    }
+}
