@@ -2,46 +2,37 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    private let counterLabel = UILabel()
-    private let tapButton = UIButton(type: .system)
-    private var tapCount = 0
+    private let viewModel = ProductsViewModel()
+    private let statusLabel = UILabel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
 
-        // настройка counterLabel
-        counterLabel.text = "Нажатий: 0"
-        counterLabel.font = .preferredFont(forTextStyle: .title2)
-        counterLabel.textAlignment = .center
+        statusLabel.font = .preferredFont(forTextStyle: .title2)
+        statusLabel.textAlignment = .center
+        statusLabel.numberOfLines = 0
 
-        // настройка tapButton
-        var config = UIButton.Configuration.filled()
-        config.title = "Тап!"
-        config.cornerStyle = .medium
-        tapButton.configuration = config
-        tapButton.addTarget(self, action: #selector(didTap), for: .touchUpInside)
-
-        // добавляем в иерархию
-        [counterLabel, tapButton].forEach {
-            view.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
-
-        // constraints
+        view.addSubview(statusLabel)
+        statusLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            counterLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            counterLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -32),
-
-            tapButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            tapButton.topAnchor.constraint(equalTo: counterLabel.bottomAnchor, constant: 24),
-            tapButton.widthAnchor.constraint(equalToConstant: 200),
-            tapButton.heightAnchor.constraint(equalToConstant: 50)
+            statusLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            statusLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            statusLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            statusLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
         ])
+
+        // Связь ViewModel -> View
+        viewModel.onUpdate = { [weak self] in
+            self?.refresh()
+        }
+        refresh()
+
+        Task { await viewModel.load() }
     }
 
-    @objc private func didTap() {
-        tapCount += 1
-        counterLabel.text = "Нажатий: \(tapCount)"
+    /// View только показывает то, что подготовила ViewModel.
+    private func refresh() {
+        statusLabel.text = viewModel.statusText
     }
 }
