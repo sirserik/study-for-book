@@ -159,32 +159,13 @@ final class RegistrationViewController: UIViewController {
 
         Task {
             do {
-                try await register(name: form.name, email: form.email, password: form.password)
+                _ = try await AuthService.shared.register(name: form.name,
+                                                          email: form.email,
+                                                          password: form.password)
                 handleSuccess()
             } catch {
                 handleError()
             }
-        }
-    }
-
-    /// Пока сетевой запрос живёт прямо здесь. В главе 27 он переедет в APIClient.
-    private func register(name: String, email: String, password: String) async throws {
-        struct Body: Encodable {
-            let name: String
-            let email: String
-            let password: String
-        }
-
-        let url = URL(string: "http://localhost:3000/auth/register")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONEncoder().encode(Body(name: name, email: email, password: password))
-
-        let (_, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse,
-              (200..<300).contains(http.statusCode) else {
-            throw URLError(.badServerResponse)
         }
     }
 

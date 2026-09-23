@@ -21,7 +21,7 @@ final class ProductsViewModel {
         onUpdate?()
 
         do {
-            let products = try await fetchProducts(limit: 20)
+            let products = try await APIClient.shared.getProducts()
             state = .loaded(products)
         } catch {
             state = .error("Не удалось загрузить товары")
@@ -49,17 +49,4 @@ final class ProductsViewModel {
 
     func product(at index: Int) -> Product { products[index] }
 
-    // Из главы 19 — сетевой код живёт отдельно от интерфейса.
-    // В главе 27 переедет в APIClient.
-    private func fetchProducts(limit: Int) async throws -> [Product] {
-        let url = URL(string: "https://dummyjson.com/products?limit=\(limit)")!
-        let (data, response) = try await URLSession.shared.data(from: url)
-
-        guard let http = response as? HTTPURLResponse,
-              (200..<300).contains(http.statusCode) else {
-            throw URLError(.badServerResponse)
-        }
-
-        return try JSONDecoder().decode(ProductsResponse.self, from: data).products
-    }
 }

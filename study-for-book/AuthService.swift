@@ -1,12 +1,5 @@
 import Foundation
 
-struct LoginResponse: Codable {
-    let token: String
-    let userId: Int
-    let name: String
-    let email: String
-}
-
 enum AuthError: Error {
     case invalidCredentials
     case network
@@ -20,41 +13,25 @@ final class AuthService {
     private(set) var token: String?
     private(set) var currentUser: LoginResponse?
 
+    var onLogout: (() -> Void)?
+
     var isLoggedIn: Bool { token != nil }
 
     func login(email: String, password: String) async throws -> LoginResponse {
-        struct Body: Encodable {
-            let email: String
-            let password: String
-        }
-
-        let url = URL(string: "http://localhost:3000/auth/login")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONEncoder().encode(Body(email: email, password: password))
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let http = response as? HTTPURLResponse else {
-            throw AuthError.network
-        }
-        if http.statusCode == 401 {
+        do {
+            let result = try await APIClient.shared.login(email: email, password: password)
+            store(result)
+            return result
+        } catch APIError.unauthorized {
             throw AuthError.invalidCredentials
-        }
-        guard (200..<300).contains(http.statusCode) else {
+        } catch {
             throw AuthError.network
         }
+    }
 
-        let result = try JSONDecoder().decode(LoginResponse.self, from: data)
-
-        token = result.token
-        currentUser = result
-        KeychainStorage.shared.save(result.token, for: "auth.token")
-        UserDefaults.standard.set(result.userId, forKey: "auth.userId")
-        UserDefaults.standard.set(result.name, forKey: "auth.name")
-        UserDefaults.standard.set(result.email, forKey: "auth.email")
-
+    func register(name: String, email: String, password: String) async throws -> LoginResponse {
+        let result = try await APIClient.shared.register(name: name, email: email, password: password)
+        store(result)
         return result
     }
 
@@ -74,6 +51,16 @@ final class AuthService {
         UserDefaults.standard.removeObject(forKey: "auth.userId")
         UserDefaults.standard.removeObject(forKey: "auth.name")
         UserDefaults.standard.removeObject(forKey: "auth.email")
+        onLogout?()
+    }
+
+    private func store(_ result: LoginResponse) {
+        token = result.token
+        currentUser = result
+        KeychainStorage.shared.save(result.token, for: "auth.token")
+        UserDefaults.standard.set(result.userId, forKey: "auth.userId")
+        UserDefaults.standard.set(result.name, forKey: "auth.name")
+        UserDefaults.standard.set(result.email, forKey: "auth.email")
     }
 
     private func restoreSession() {
