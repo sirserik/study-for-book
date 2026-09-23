@@ -18,7 +18,14 @@ final class MainTabBarController: UITabBarController {
             selectedImage: UIImage(systemName: "cart.fill")
         )
 
-        viewControllers = [productsNav, cartNav]
+        let profileNav = UINavigationController(rootViewController: ProfileViewController())
+        profileNav.tabBarItem = UITabBarItem(
+            title: "Профиль",
+            image: UIImage(systemName: "person"),
+            selectedImage: UIImage(systemName: "person.fill")
+        )
+
+        viewControllers = [productsNav, cartNav, profileNav]
 
         CartStorage.shared.addObserver { [weak self] _ in
             self?.updateCartBadge()
